@@ -15,6 +15,7 @@ public class AgentMain {
     }
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
-        MemoryCommand.printMemory();
+//        MemoryCommand.printMemory();
+        MemoryCommand.heapDump();
     }
 }

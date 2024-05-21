@@ -1,6 +1,11 @@
 package com.hone.command;
 
+import com.sun.management.HotSpotDiagnosticMXBean;
+
+import java.io.IOException;
 import java.lang.management.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -57,5 +62,15 @@ public class MemoryCommand {
                             .append("m").toString();
                     System.out.println(m);
                 });
+    }
+
+    public static void heapDump(){
+        HotSpotDiagnosticMXBean platformMXBean = ManagementFactory.getPlatformMXBean(HotSpotDiagnosticMXBean.class);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
+        try {
+            platformMXBean.dumpHeap(simpleDateFormat.format(new Date())+".hprof",true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
