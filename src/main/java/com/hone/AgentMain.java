@@ -1,6 +1,8 @@
 package com.hone;
 
+import com.hone.command.ClassCommand;
 import com.hone.command.MemoryCommand;
+import com.hone.command.ThreadCommand;
 
 import java.lang.instrument.Instrumentation;
 
@@ -16,6 +18,8 @@ public class AgentMain {
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
 //        MemoryCommand.printMemory();
-        MemoryCommand.heapDump();
+//        MemoryCommand.heapDump();
+//        ThreadCommand.printThread();
+        ClassCommand.printClassLoader(inst);
     }
 }
