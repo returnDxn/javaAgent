@@ -1,9 +1,6 @@
 package com.hone.command;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryManagerMXBean;
-import java.lang.management.MemoryPoolMXBean;
-import java.lang.management.MemoryType;
+import java.lang.management.*;
 import java.util.List;
 
 /**
@@ -20,6 +17,29 @@ public class MemoryCommand {
         //非堆内存
         System.out.println("非堆内存:");
         getMemoryInfo(memoryPoolMXBeans, MemoryType.NON_HEAP);
+        //打印nio相关内容
+        System.out.println("nio相关内容:");
+        printNioMemory();
+
+    }
+    private static void printNioMemory() {
+        try {
+            Class clazz = Class.forName("java.lang.management.BufferPoolMXBean");
+            List<BufferPoolMXBean> platformMXBeans = ManagementFactory.getPlatformMXBeans(clazz);
+            for (BufferPoolMXBean x : platformMXBeans) {
+                StringBuilder sb = new StringBuilder();
+                String m = sb.append("名字：")
+                        .append(x.getName())
+                        .append(" memoryUsed：")
+                        .append(x.getMemoryUsed() / 1024 / 1024)
+                        .append("m totalCapacity：")
+                        .append(x.getTotalCapacity() / 1024 / 1024)
+                        .append("m").toString();
+                System.out.println(m);
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void getMemoryInfo(List<MemoryPoolMXBean> memoryPoolMXBeans, MemoryType heap) {
