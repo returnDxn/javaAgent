@@ -20,6 +20,7 @@ public class AgentMain {
 //        MemoryCommand.printMemory();
 //        MemoryCommand.heapDump();
 //        ThreadCommand.printThread();
-        ClassCommand.printClassLoader(inst);
+//        ClassCommand.printClassLoader(inst);
+        ClassCommand.printClassSource(inst);
     }
 }
