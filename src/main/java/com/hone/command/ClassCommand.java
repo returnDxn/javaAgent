@@ -1,6 +1,14 @@
 package com.hone.command;
 
 
+import com.hone.enhancer.AsmEnhancer;
+import com.hone.enhancer.MyAdvice;
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.utility.JavaModule;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
@@ -179,6 +187,56 @@ public class ClassCommand {
             decompiler.decompile(loader, printer, className);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void enhanceClass(Instrumentation inst){
+        System.out.println("请输入类名：");
+        Scanner scanner = new Scanner(System.in);
+        String next = scanner.next();
+        Class[] allLoadedClasses = inst.getAllLoadedClasses();
+        for (Class allLoadedClass : allLoadedClasses) {
+            if (allLoadedClass.getName().equals(next)) {
+                ClassFileTransformer transformer = new ClassFileTransformer() {
+                    @Override
+                    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+                        //通过asm对类型进行增强,返回字节码
+                        return AsmEnhancer.enhancerClass(classfileBuffer);
+                    }
+                };
+
+                //1.添加转换器
+                inst.addTransformer(transformer, true);
+                //2.手动触发转换器
+                try {
+                    inst.retransformClasses(allLoadedClass);
+                } catch (UnmodifiableClassException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    //3.删除转换器
+                    inst.removeTransformer(transformer);
+                }
+            }
+        }
+    }
+
+    public static void enhanceClassByteBuddy(Instrumentation inst){
+        System.out.println("请输入类名：");
+        Scanner scanner = new Scanner(System.in);
+        String next = scanner.next();
+        Class[] allLoadedClasses = inst.getAllLoadedClasses();
+        for (Class allLoadedClass : allLoadedClasses) {
+            if (allLoadedClass.getName().equals(next)) {
+                new AgentBuilder.Default()
+                        .disableClassFormatChanges()
+                        .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
+                        .with(new AgentBuilder.Listener.WithTransformationsOnly(AgentBuilder.Listener.StreamWriting
+                                .toSystemOut()))
+                        .type(ElementMatchers.named(next))
+                        .transform((builder, typeDescription, classLoader, javaModule, protectionDomain) ->
+                                builder.visit(Advice.to(MyAdvice.class).on(ElementMatchers.any())))
+                        .installOn(inst);
+            }
         }
     }
 }
