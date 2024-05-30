@@ -39,6 +39,6 @@ public class AttachMain {
         Scanner scanner = new Scanner(System.in);
         String pid = scanner.next();
         VirtualMachine attach = VirtualMachine.attach(pid);
-        attach.loadAgent("D:\\devtools\\workspace\\javaagent\\target\\javaagent-1.0-SNAPSHOT-jar-with-dependencies.jar");
+        attach.loadAgent("javaagent-1.0-SNAPSHOT-jar-with-dependencies.jar");
     }
 }
